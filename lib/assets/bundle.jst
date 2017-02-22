@@ -1,0 +1,41 @@
+var ${ exportName };
+
+(function(global) {
+    function buildBemXjst() {
+        var exports = {};
+
+        ${ bemxjst }
+
+        return exports;
+    };
+
+    var defineAsGlobal = true;
+
+    // Provide with CommonJS
+    if (typeof module === 'object' && typeof module.exports === 'object') {
+        exports['${ exportName }'] = buildBemXjst();
+        defineAsGlobal = false;
+    }
+
+    // Provide to YModules
+    if (typeof modules === 'object') {
+        modules.define(
+            '${ exportName }',
+            [<%_.each([], function(name) {%>'${ name }',<%});%>],
+            function(
+                provide<%if ([].length) {%>,<%}%>
+                ${ [].join(', ') }
+                ) {
+                    provide(buildBemXjst());
+                }
+            );
+
+        defineAsGlobal = false;
+    }
+
+    // Provide to global scope
+    if (defineAsGlobal) {
+        ${ exportName } = buildBemXjst();
+        global['${ exportName }'] = ${ exportName };
+    }
+})(typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : this);

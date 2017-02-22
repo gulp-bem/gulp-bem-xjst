@@ -11,7 +11,7 @@ var format = util.format;
  * @param {String} filepath - Path to the file
  * @return {String|Object}
  */
-module.exports = function (err, code, filepath) {
+module.exports = function(err, code, filepath) {
     // Assume that esprima parser failed
     if (err.description && err.column && err.lineNumber) {
         var source = code.split('\n');
@@ -23,14 +23,12 @@ module.exports = function (err, code, filepath) {
 
         var fragment = source.slice(startLine, endLine);
         // Adding marker
-        fragment.splice(errorLine - startLine + 1, 0, Array(err.column).join(' ') + '^');
+        fragment.splice(errorLine - startLine + 1, 0, new Array(err.column).join(' ') + '^');
 
-        var message = format('%s at %s:\n%s',
+        return format('%s at %s:\n%s',
             err.description,
             path.basename(filepath),
             fragment.join('\n'));
-
-        return message;
     }
 
     return err;

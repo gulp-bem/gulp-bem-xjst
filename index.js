@@ -12,13 +12,18 @@ var isStream = require('is-stream');
 var toArray = require('stream-to-array');
 
 var formatError = require('./error');
+var bundle = require('./lib/templates/bundle');
 
 var pluginName = path.basename(__dirname);
 
 /**
  * bem-xjst templates compiler.
  *
- * @param {{extension: string}} options - Options for generator.
+ * @param {Object} [options] - Options for generator.
+ * @param {String} [options.extension] - File extension. Default: engine name.
+ * @param {String} [options.exportName] - Name for export. Please notice if you set this option generated code will
+ * @param {Object} [options.engine] - Engine compiler options. @see
+ *   https://github.com/bem/bem-xjst/blob/master/docs/en/3-api.md#settings wrapped with CommonJS, YModules or Global
  * @param {String|Function} engine - 'bemhtml' either 'bemtree' or any xjst-like engine function.
  * @returns {Stream}
  */
@@ -32,7 +37,7 @@ module.exports = function(options, engine) {
         engineName = engine;
         engine = bemxjst[engine];
     } else {
-        engineName = (engine.engineName || engine.name || Object(engine.runtime).name).toLowerCase() || 'xjst';
+        engineName = (engine.engineName || (engine.runtime && engine.runtime.name)).toLowerCase() || 'xjst';
     }
 
     return through.obj(function(file, encoding, callback) {
@@ -44,16 +49,17 @@ module.exports = function(options, engine) {
             return callback(new PluginError(pluginName, 'Streaming not supported'));
         }
 
+        var res;
         var code = file.contents.toString();
-        var res = tryCatch(function() {
-            return engine.generate(code, options);
-        }, function(e) {
-            return new PluginError(pluginName, formatError(e, code, file.path), {
+
+        try {
+            var compiledCode = engine.generate(code, options);
+            res = options.exportName ? bundle(compiledCode, options) : compiledCode;
+        } catch (e) {
+            var err = new PluginError(pluginName, formatError(e, code, file.path), {
                 fileName: file.path
             });
-        });
-        if (res instanceof PluginError) {
-            return callback(res);
+            return callback(err);
         }
 
         file.contents = new Buffer(res);
@@ -75,8 +81,8 @@ module.exports.bemtree = function(options) {
 /**
  * Wrapper for anything.apply with bemjson.
  *
- * @param {Stream<Vinyl>} templatesStream - Stream with bemhtmls
- * @returns {TransformStream<Vinyl>} - transform stream that applies templates to each incoming bemjson vinyl
+ * @param {Stream<File>} templatesStream - Stream with bemhtmls
+ * @returns {stream.Transform<File>} - transform stream that applies templates to each incoming bemjson vinyl
  */
 module.exports.toHtml = function(templatesStream) {
     if (!isStream(templatesStream)) {
@@ -93,9 +99,9 @@ module.exports.toHtml = function(templatesStream) {
             return callback(new PluginError(pluginName, 'Streaming not supported'));
         }
 
-        tryCatch(function () {
+        tryCatch(function() {
             return bemjsonFile.data || (bemjsonFile.data = _eval(String(bemjsonFile.contents), bemjsonFile.path));
-        }, function (err) {
+        }, function(err) {
             callback(new PluginError(pluginName, 'Error at evaluating bemjson: ' + err));
         });
 
@@ -107,16 +113,16 @@ module.exports.toHtml = function(templatesStream) {
         var _this = this;
 
         templatesPromise
-            .then(function (templatesVinyls) {
+            .then(function(templatesVinyls) {
                 // Handle multiple templates case
                 var n = 0;
 
                 templatesVinyls.forEach(function(file) {
                     file.data || (file.data = _eval(String(file.contents)));
 
-                    var html = tryCatch(function () {
+                    var html = tryCatch(function() {
                         return file.data.apply(bemjsonFile.data);
-                    }, function (err) {
+                    }, function(err) {
                         throw new Error('BEMHTML error: ' + err);
                     });
 
@@ -135,7 +141,7 @@ module.exports.toHtml = function(templatesStream) {
 
                 callback();
             })
-            .catch(function (err) {
+            .catch(function(err) {
                 callback(new PluginError(pluginName, err));
             });
     });

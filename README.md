@@ -35,11 +35,11 @@ bem-xjst engines accesible via properties `bemhtml` and `bemtree`:
 var engine = require('gulp-bem-xjst')[engine];
 ```
 
-### Plugin options
+### Options
 
-* *String* **exportName** — Engine handler's variable name. Default — `BEMHTML`.
-* *String* **engine** — Engine's name. Default — `BEMHTML`.
+* *String* **exportName** — Engine handler's variable name.
 * *String* **extension** — extension for file. Default — `.${engine}.js`.
+* *Object* **engine** — XJST [options](https://github.com/bem/bem-xjst/blob/master/docs/en/3-api.md#settings).
 
 ### License
 
