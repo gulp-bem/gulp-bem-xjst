@@ -49,17 +49,19 @@ module.exports = function(options, engine) {
             return callback(new PluginError(pluginName, 'Streaming not supported'));
         }
 
-        var res;
         var code = file.contents.toString();
-
-        try {
+        var res = tryCatch(function() {
             var compiledCode = engine.generate(code, options);
-            res = options.exportName ? bundle(compiledCode, options) : compiledCode;
-        } catch (e) {
-            var err = new PluginError(pluginName, formatError(e, code, file.path), {
+
+            return options.exportName ? bundle(compiledCode, options) : compiledCode;
+        }, function(e) {
+            return new PluginError(pluginName, formatError(e, code, file.path), {
                 fileName: file.path
             });
-            return callback(err);
+        });
+
+        if (res instanceof PluginError) {
+            return callback(res);
         }
 
         file.contents = new Buffer(res);
