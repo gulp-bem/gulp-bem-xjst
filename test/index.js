@@ -60,11 +60,11 @@ describe('gulp-bemhtml', function () {
         });
     });
 
-    describe('stream with exportName', function() {
+    describe('stream with exportName', function () {
         var vinylFile;
 
-        before(function(next) {
-            var stream = lib.bemhtml({ exportName: 'BEMHTML' })
+        before(function (next) {
+            var stream = lib.bemhtml({exportName: 'BEMHTML'})
                 .on('data', function (file) {
                     vinylFile = file;
                 })
@@ -78,16 +78,16 @@ describe('gulp-bemhtml', function () {
                 .pipe(stream);
         });
 
-        it('should export compiler to global', function() {
+        it('should export compiler to global', function () {
             var engine = _eval(vinylFile.contents.toString());
 
             expect(engine).to.have.property('BEMHTML');
             expect(engine.BEMHTML.apply).to.be.a('function');
         });
 
-        it('should export compiler to custom name', function(next) {
+        it('should export compiler to custom name', function (next) {
             var testFile = '';
-            var stream = lib.bemhtml({ exportName: 'customProperty' })
+            var stream = lib.bemhtml({exportName: 'customProperty'})
                 .on('data', function (file) {
                     testFile = file;
                 })
@@ -108,14 +108,14 @@ describe('gulp-bemhtml', function () {
             }
         });
 
-        it('should export compiler to YModules', function() {
+        it('should export compiler to YModules', function () {
             var vm = require('vm');
             var name = '';
 
             vm.runInNewContext(vinylFile.contents.toString(), {
                 require: require,
                 console: console,
-                modules: { define: function(exportName) { name = exportName; } }
+                modules: {define: function (exportName) { name = exportName; }}
             });
 
             expect(name).to.be('BEMHTML');

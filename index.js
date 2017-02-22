@@ -27,7 +27,7 @@ var pluginName = path.basename(__dirname);
  * @param {String|Function} engine - 'bemhtml' either 'bemtree' or any xjst-like engine function.
  * @returns {Stream}
  */
-module.exports = function(options, engine) {
+module.exports = function (options, engine) {
     options = options || {};
 
     assert(typeof engine === 'string' || typeof (engine && engine.generate) === 'function', 'Invalid engine');
@@ -40,7 +40,7 @@ module.exports = function(options, engine) {
         engineName = (engine.engineName || (engine.runtime && engine.runtime.name)).toLowerCase() || 'xjst';
     }
 
-    return through.obj(function(file, encoding, callback) {
+    return through.obj(function (file, encoding, callback) {
         if (file.isNull()) {
             return callback(null, file);
         }
@@ -50,11 +50,11 @@ module.exports = function(options, engine) {
         }
 
         var code = file.contents.toString();
-        var res = tryCatch(function() {
+        var res = tryCatch(function () {
             var compiledCode = engine.generate(code, options);
 
             return options.exportName ? bundle(compiledCode, options) : compiledCode;
-        }, function(e) {
+        }, function (e) {
             return new PluginError(pluginName, formatError(e, code, file.path), {
                 fileName: file.path
             });
@@ -72,11 +72,11 @@ module.exports = function(options, engine) {
     });
 };
 
-module.exports.bemhtml = function(options) {
+module.exports.bemhtml = function (options) {
     return module.exports(options, 'bemhtml');
 };
 
-module.exports.bemtree = function(options) {
+module.exports.bemtree = function (options) {
     return module.exports(options, 'bemtree');
 };
 
@@ -86,14 +86,14 @@ module.exports.bemtree = function(options) {
  * @param {Stream<File>} templatesStream - Stream with bemhtmls
  * @returns {stream.Transform<File>} - transform stream that applies templates to each incoming bemjson vinyl
  */
-module.exports.toHtml = function(templatesStream) {
+module.exports.toHtml = function (templatesStream) {
     if (!isStream(templatesStream)) {
         throw new PluginError(pluginName, 'Parameter should be a Stream');
     }
 
     var templatesPromise = toArray(templatesStream);
 
-    return through.obj(function(bemjsonFile, _, callback) {
+    return through.obj(function (bemjsonFile, _, callback) {
         if (bemjsonFile.isNull()) {
             return callback(null, bemjsonFile);
         }
@@ -101,9 +101,9 @@ module.exports.toHtml = function(templatesStream) {
             return callback(new PluginError(pluginName, 'Streaming not supported'));
         }
 
-        tryCatch(function() {
+        tryCatch(function () {
             return bemjsonFile.data || (bemjsonFile.data = _eval(String(bemjsonFile.contents), bemjsonFile.path));
-        }, function(err) {
+        }, function (err) {
             callback(new PluginError(pluginName, 'Error at evaluating bemjson: ' + err));
         });
 
@@ -115,16 +115,16 @@ module.exports.toHtml = function(templatesStream) {
         var _this = this;
 
         templatesPromise
-            .then(function(templatesVinyls) {
+            .then(function (templatesVinyls) {
                 // Handle multiple templates case
                 var n = 0;
 
-                templatesVinyls.forEach(function(file) {
+                templatesVinyls.forEach(function (file) {
                     file.data || (file.data = _eval(String(file.contents)));
 
-                    var html = tryCatch(function() {
+                    var html = tryCatch(function () {
                         return file.data.apply(bemjsonFile.data);
-                    }, function(err) {
+                    }, function (err) {
                         throw new Error('BEMHTML error: ' + err);
                     });
 
@@ -143,7 +143,7 @@ module.exports.toHtml = function(templatesStream) {
 
                 callback();
             })
-            .catch(function(err) {
+            .catch(function (err) {
                 callback(new PluginError(pluginName, err));
             });
     });
