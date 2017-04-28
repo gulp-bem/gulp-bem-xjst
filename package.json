@@ -33,7 +33,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "bem-xjst": "^8.4.0",
+    "bem-xjst": "^8.6.9",
     "is-stream": "^1.1.0",
     "node-eval": "^1.1.0",
     "plugin-error": "^0.1.2",
