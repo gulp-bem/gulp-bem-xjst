@@ -3,7 +3,10 @@
   "version": "3.0.0",
   "description": "bem-xjst templates compiler",
   "keywords": [
+    "gulp",
+    "plugin",
     "gulpplugin",
+    "bem",
     "bemhtml",
     "bemtree",
     "bem-xjst",
@@ -33,7 +36,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "bem-xjst": "^8.4.0",
+    "bem-xjst": "8.x",
     "is-stream": "^1.1.0",
     "node-eval": "^1.1.0",
     "plugin-error": "^0.1.2",
