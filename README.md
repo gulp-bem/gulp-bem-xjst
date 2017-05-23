@@ -1,6 +1,6 @@
 # gulp-bem-xjst
 
-> Compile [bemhtml](http://en.bem.info/technology/bemhtml/v2/reference/) templates into JavaScript
+> Compiles [BEMHTML](http://en.bem.info/technology/bemhtml/v2/reference/) and BEMTREE templates into JavaScript.
 
 [![NPM Status][npm-img]][npm]
 [![Travis Status][test-img]][travis]
@@ -20,7 +20,7 @@
 
 * [Node.js 4+](https://nodejs.org/en/)
 
-## Install
+## Installation
 
 ```sh
 $ npm install gulp-bem-xjst
@@ -29,12 +29,13 @@ $ npm install gulp-bem-xjst
 ## Usage
 
 ```js
-var gulp = require('gulp');
-var bemhtml = require('gulp-bem-xjst').bemhtml;
+const gulp = require('gulp');
+const bemxjst = require('bemxjst');
+const bemhtml = require('gulp-bem-xjst').bemhtml;
 
 gulp.task('default', function () {
   return gulp.src('page.bemhtml')
-    .pipe(bemhtml())
+    .pipe(bemhtml({ bemxjst }))
     .pipe(gulp.dest('dist'));
 });
 ```
@@ -45,17 +46,17 @@ $ node -p "require('./dist/page.bemhtml.js').apply({block: 'page'});"
 
 ## API
 
-bem-xjst engines accesible via properties `bemhtml` and `bemtree`:
-```
-var engine = require('gulp-bem-xjst')[engine];
+`bem-xjst` engines accesible via properties `bemhtml` and `bemtree`:
+```js
+const engine = require('gulp-bem-xjst')[engine];
 ```
 
 ### Plugin options
 
-* *String* **exportName** — Engine handler's variable name. Default — `BEMHTML`.
-* *String* **engine** — Engine's name. Default — `BEMHTML`.
+* *String* **engine** — engine's name: `bemhtml` or `bemtree`. Default — `bemhtml`.
 * *String* **extension** — extension for file. Default — `.${engine}.js`.
+* *Module* **bemxjst** — custom `bem-xjst` version. The last `v8.x` by default.
 
-### License
+## License
 
 [MIT](./LICENSE)
