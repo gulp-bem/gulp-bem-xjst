@@ -18,19 +18,23 @@ var pluginName = path.basename(__dirname);
 /**
  * bem-xjst templates compiler.
  *
- * @param {{extension: string}} options - Options for generator.
- * @param {String|Function} engine - 'bemhtml' either 'bemtree' or any xjst-like engine function.
- * @returns {Stream}
+ * @param {{extension: string, bemxjst: *}} options - Options for generator.
+ * @param {String|Function} engine - either 'bemhtml', or 'bemtree', or any xjst-like engine function.
+ * @returns {TransformStream.<File, File>}
  */
 module.exports = function(options, engine) {
     options = options || {};
+
+    var module = options.bemxjst || bemxjst;
+
+    engine || (engine = options.engine || 'bemhtml');
 
     assert(typeof engine === 'string' || typeof (engine && engine.generate) === 'function', 'Invalid engine');
 
     var engineName;
     if (typeof engine === 'string') {
         engineName = engine;
-        engine = bemxjst[engine];
+        engine = module[engine];
     } else {
         engineName = (engine.engineName || engine.name || Object(engine.runtime).name).toLowerCase() || 'xjst';
     }
